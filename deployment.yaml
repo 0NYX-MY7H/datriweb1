@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datriweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datriweb
+  template:
+    metadata:
+      labels:
+        app: datriweb
+    spec:
+      containers:
+        - name: datriweb
+          image: datricon/datriweb:latest
+          ports:
+            - containerPort: 9000
