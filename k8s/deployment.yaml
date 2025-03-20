@@ -1,30 +1,49 @@
-containers:
-  - name: datriweb
-    image: datricon/datriweb:latest
-    ports:
-      - containerPort: 9000
-    command: ["/bin/sh", "-c"]
-    args:
-      - |
-        cp .env.example .env &&
-        php artisan key:generate --force &&
-        php artisan migrate --force &&
-        php artisan optimize &&
-        php-fpm
-    env:
-      - name: DB_HOST
-        value: mysql
-      - name: DB_DATABASE
-        value: laravel
-      - name: DB_USERNAME
-        value: datriuser
-      - name: DB_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: laravel-secrets
-            key: db_password
-      - name: APP_KEY
-        valueFrom:
-          secretKeyRef:
-            name: laravel-secrets
-            key: app_key
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datriweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datriweb
+  template:
+    metadata:
+      labels:
+        app: datriweb
+    spec:
+      containers:
+        - name: datriweb
+          image: datricon/datriweb:latest
+          ports:
+            - containerPort: 9000
+          env:
+            - name: DB_HOST
+              value: mysql
+            - name: DB_DATABASE
+              value: laravel
+            - name: DB_USERNAME
+              value: datriuser
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: db_password
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: app_key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datriweb-service
+spec:
+  selector:
+    app: datriweb
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9000
+  type: LoadBalancer
