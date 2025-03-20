@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: datriweb
-          image: datricon/datriweb:latest
+          image: yourdockerhubusername/datriweb:latest
           ports:
             - containerPort: 9000
           env:
@@ -34,16 +34,3 @@ spec:
                 secretKeyRef:
                   name: laravel-secrets
                   key: app_key
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: datriweb-service
-spec:
-  selector:
-    app: datriweb
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 9000
-  type: LoadBalancer
