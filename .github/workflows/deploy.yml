@@ -25,14 +25,17 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/datriweb:latest
 
-      - name: Deploy to Kubernetes
-        uses: steebchen/kubectl@v2.3.0
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
         with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          command: apply -f k8s/deployment.yaml
+          version: 'latest'
 
-      - name: Restart deployment (update image)
-        uses: steebchen/kubectl@v2.3.0
-        with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          command: rollout restart deployment datriweb
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl rollout restart deployment datriweb
